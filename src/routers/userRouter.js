@@ -1,44 +1,44 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-//Adding a user. 
 
 router.post('/register', async (req, res) => {
-    // const user = new User(req.body);
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 8)
-        const user = await new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword
-        }).save();
-        res.send(user)
+        const hashedPassword = await bcrypt.hash(req.body.password, 8);
+        const user = await new User(req.body).save();
 
+        res.send(user);
     } catch (e) {
-        res.status(500).send();
-
+        res.status(500).send('cant store this user');
     }
 });
 
 //Constructing login route.
 router.post('/login', async (req, res) => {
-
     try {
         const user = await User.findOne({
             email: req.body.email
         });
-        const isMatch = await bcrypt.compare(req.body.password, user.password)
 
-        if (!isMatch) {
-            return res.status(404).send();
+        if (!user) {
+            throw new Error('there is no user with this email');
         }
-        res.send(user)
+
+        const isMatch = bcrypt.compare(req.body.password, user.password);
+        if (!isMatch) {
+            throw new Error('Wrong password!');
+        }
+
+        const token = await user.generateAuthToken();
+
+        res.send({
+            user,
+            token
+        });
     } catch (e) {
-
-        res.status(500).send(e);
+        res.status(404).send('Ooops');
     }
-
-})
+});
 
 module.exports = router;

@@ -13,11 +13,10 @@ const Task = require('./models/task');
 const userRouter = require('./routers/userRouter');
 const taskRouter = require('./routers/taskRouter');
 
-
 app.use(userRouter);
 app.use(taskRouter);
 
 // Configuring the server by listening to specific defined port "3000" or env port which we we deploy the app.
 app.listen(port, () => {
-    console.log(`We are listening to ${port}`);
+  console.log(`We are listening to ${port}`);
 });
